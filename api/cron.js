@@ -1,12 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
-import 'dotenv/config';
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE);
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE
+);
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_ASSISTANT_ID = process.env.OPENAI_ASSISTANT_ID;
 
 async function runAssistant(threadId, userMessage) {
-  // 1. Envia mensagem
   await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
     method: 'POST',
     headers: {
@@ -17,7 +18,6 @@ async function runAssistant(threadId, userMessage) {
     body: JSON.stringify({ role: 'user', content: userMessage })
   });
 
-  // 2. Roda o assistant
   const runRes = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs`, {
     method: 'POST',
     headers: {
@@ -29,7 +29,6 @@ async function runAssistant(threadId, userMessage) {
   });
   const run = await runRes.json();
 
-  // 3. Espera
   let status;
   do {
     const check = await fetch(`https://api.openai.com/v1/threads/${threadId}/runs/${run.id}`, {
@@ -42,7 +41,6 @@ async function runAssistant(threadId, userMessage) {
     if (status !== 'completed') await new Promise(r => setTimeout(r, 1000));
   } while (status !== 'completed');
 
-  // 4. Busca a resposta
   const messages = await fetch(`https://api.openai.com/v1/threads/${threadId}/messages`, {
     headers: {
       Authorization: `Bearer ${OPENAI_API_KEY}`,
@@ -54,7 +52,7 @@ async function runAssistant(threadId, userMessage) {
   return last?.content[0]?.text?.value || '[Sem resposta]';
 }
 
-async function processPendingMessages() {
+export default async function handler(req, res) {
   const { data: pending } = await supabase
     .from('messages')
     .select('*')
@@ -85,6 +83,6 @@ async function processPendingMessages() {
       }).eq('id', msg.id);
     }
   }
-}
 
-await processPendingMessages();
+  res.status(200).json({ status: "worker rodou com sucesso!" });
+}
