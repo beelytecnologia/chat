@@ -1,91 +1,73 @@
-
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE);
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
+  const { OPENAI_API_KEY, OPENAI_ASSISTANT_ID } = process.env;
   const { message } = req.body;
 
-  const { data, error } = await supabase
-    .from('messages')
-    .insert({ user_input: message, status: 'pending' })
-    .select()
-    .single();
+  console.log("message:", message);
+  console.log("envs:", {
+    OPENAI_API_KEY: !!OPENAI_API_KEY,
+    OPENAI_ASSISTANT_ID: !!OPENAI_ASSISTANT_ID
+  });
 
-  if (error) return res.status(500).json({ error: "Erro ao salvar" });
+  try {
+    // 1. Salva no Supabase como pendente
+    const { data: insertData, error: insertError } = await supabase
+      .from('messages')
+      .insert({ user_input: message, status: 'pending' })
+      .select()
+      .single();
 
-  res.status(200).json({ id: data.id });
-}
+    if (insertError) throw insertError;
 
-export default async function handler(req, res) {
-    if (req.method !== 'POST') return res.status(405).end();
-  
-    const { OPENAI_API_KEY, OPENAI_ASSISTANT_ID } = process.env;
-    const { message } = req.body;
-  
-    try {
-      // 1. Cria thread
-      const thread = await fetch("https://api.openai.com/v1/threads", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-          "Content-Type": "application/json",
-          "OpenAI-Beta": "assistants=v1"
-        }
-      }).then(res => res.json());
-  
-      // 2. Envia mensagem
-      await fetch(`https://api.openai.com/v1/threads/${thread.id}/messages`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-          "Content-Type": "application/json",
-          "OpenAI-Beta": "assistants=v1"
-        },
-        body: JSON.stringify({ role: "user", content: message })
-      });
-  
-      // 3. Roda o assistant
-      const run = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-          "Content-Type": "application/json",
-          "OpenAI-Beta": "assistants=v1"
-        },
-        body: JSON.stringify({ assistant_id: OPENAI_ASSISTANT_ID })
-      }).then(res => res.json());
-  
-      // 4. Espera o processamento (polling)
-      let status = null;
-      do {
-        const check = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs/${run.id}`, {
-          headers: {
-            Authorization: `Bearer ${OPENAI_API_KEY}`,
-            "OpenAI-Beta": "assistants=v1"
-          }
-        }).then(res => res.json());
-  
-        status = check.status;
-        if (status !== "completed") await new Promise(r => setTimeout(r, 1000));
-      } while (status !== "completed");
-  
-      // 5. Busca a última mensagem
-      const messagesRes = await fetch(`https://api.openai.com/v1/threads/${thread.id}/messages`, {
-        headers: {
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-          "OpenAI-Beta": "assistants=v1"
-        }
-      }).then(res => res.json());
-  
-      const last = messagesRes.data.reverse().find(msg => msg.role === "assistant");
-      res.status(200).json({ reply: last?.content[0]?.text?.value || "[Sem resposta]" });
-  
-    } catch (e) {
-      console.error(e);
-      res.status(500).json({ error: "Erro ao processar assistant." });
-    }
+    // 2. Cria uma thread no Assistant
+    const thread = await fetch("https://api.openai.com/v1/threads", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+        "OpenAI-Beta": "assistants=v1"
+      }
+    }).then(res => res.json());
+
+    // 3. Envia a mensagem do usuário
+    await fetch(`https://api.openai.com/v1/threads/${thread.id}/messages`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+        "OpenAI-Beta": "assistants=v1"
+      },
+      body: JSON.stringify({ role: "user", content: message })
+    });
+
+    // 4. Cria o "run" do assistant
+    const run = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
+        "OpenAI-Beta": "assistants=v1"
+      },
+      body: JSON.stringify({ assistant_id: OPENAI_ASSISTANT_ID })
+    }).then(res => res.json());
+
+    // 5. Atualiza a mensagem com a thread e run ID
+    await supabase.from('messages').update({
+      thread_id: thread.id,
+      run_id: run.id,
+      status: 'processing'
+    }).eq('id', insertData.id);
+
+    // Retorna apenas o ID da mensagem para polling no frontend
+    res.status(200).json({ id: insertData.id });
+
+  } catch (e) {
+    console.error("Erro ao processar assistant:", e);
+    res.status(500).json({ error: "Erro ao processar assistant." });
   }
-  
+}
