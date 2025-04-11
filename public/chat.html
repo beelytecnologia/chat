@@ -486,11 +486,13 @@ async function fetchAssistantReply(userText) {
       role: "assistant",
       content: reply
     });
+
   } catch (err) {
     typeMessage("Erro ao consultar agente.");
     console.error(err);
   }
 }
+
 
     /**********************
      * 5) TOAST (exemplo)
