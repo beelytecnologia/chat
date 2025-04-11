@@ -1,9 +1,7 @@
+// api/cron.js
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE
-);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE);
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_ASSISTANT_ID = process.env.OPENAI_ASSISTANT_ID;
 
@@ -27,6 +25,7 @@ async function runAssistant(threadId, userMessage) {
     },
     body: JSON.stringify({ assistant_id: OPENAI_ASSISTANT_ID })
   });
+
   const run = await runRes.json();
 
   let status;
@@ -53,14 +52,11 @@ async function runAssistant(threadId, userMessage) {
 }
 
 export default async function handler(req, res) {
-  const { data: pending } = await supabase
-    .from('messages')
-    .select('*')
-    .eq('status', 'pending');
+  const { data: pendings } = await supabase.from('messages').select('*').eq('status', 'pending');
 
-  for (const msg of pending) {
+  for (const msg of pendings) {
     try {
-      const thread = await fetch("https://api.openai.com/v1/threads", {
+      const thread = await fetch(`https://api.openai.com/v1/threads`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${OPENAI_API_KEY}`,
@@ -76,13 +72,12 @@ export default async function handler(req, res) {
         status: 'completed'
       }).eq('id', msg.id);
     } catch (e) {
-      console.error("Erro ao processar:", e);
       await supabase.from('messages').update({
-        reply: '[Erro ao processar]',
-        status: 'error'
+        status: 'error',
+        reply: '[Erro ao processar]'
       }).eq('id', msg.id);
     }
   }
 
-  res.status(200).json({ status: "worker rodou com sucesso!" });
+  res.status(200).json({ ok: true });
 }

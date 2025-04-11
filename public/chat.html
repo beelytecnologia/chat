@@ -476,7 +476,8 @@ async function fetchAssistantReply(userText) {
     const text = await response.text();
 console.log("Texto bruto recebido:", text); // 👈 isso aqui
 
-let data;
+const data = await response.json();
+console.log("Enviado. ID no Supabase:", data.id);
 try {
   data = JSON.parse(text);
 } catch (jsonErr) {
