@@ -473,31 +473,33 @@ async function fetchAssistantReply(userText) {
       body: JSON.stringify({ message: userText })
     });
 
-    const { id } = await response.json();
+    const text = await response.text(); // 👈 pega texto cru
+    let data;
 
-    // Polling para aguardar resposta do Supabase
-    let tries = 0;
-    let reply = null;
-    while (tries < 10 && !reply) {
-      const res = await fetch(`/api/check?id=${id}`);
-      const data = await res.json();
-      if (data.reply) reply = data.reply;
-      else {
-        await new Promise(r => setTimeout(r, 2000));
-        tries++;
-      }
+    try {
+      data = JSON.parse(text); // 👈 tenta parsear
+    } catch (jsonErr) {
+      console.error("Erro de JSON:", text);
+      typeMessage("Erro no formato da resposta.");
+      return;
     }
 
-    if (reply) {
-      typeMessage(reply);
+    if (data.reply) {
+      typeMessage(data.reply);
+      conversations[currentConversationIndex].messages.push({
+        role: "assistant",
+        content: data.reply
+      });
     } else {
-      typeMessage("[Sem resposta após timeout]");
+      typeMessage("[Sem resposta do servidor]");
     }
+
   } catch (err) {
-    console.error(err);
+    console.error("Erro no fetch:", err);
     typeMessage("Erro ao consultar servidor.");
   }
 }
+
 
 
 
