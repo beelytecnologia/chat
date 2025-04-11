@@ -469,24 +469,30 @@ async function fetchAssistantReply(userText) {
   try {
     const response = await fetch("/api/chat", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: userText })
     });
 
-    const data = await response.json();
+    const { id } = await response.json();
 
-    if (data.reply) {
-      typeMessage(data.reply);
-      conversations[currentConversationIndex].messages.push({
-        role: "assistant",
-        content: data.reply
-      });
-    } else {
-      typeMessage("[Sem resposta do servidor]");
+    // Polling para aguardar resposta do Supabase
+    let tries = 0;
+    let reply = null;
+    while (tries < 10 && !reply) {
+      const res = await fetch(`/api/check?id=${id}`);
+      const data = await res.json();
+      if (data.reply) reply = data.reply;
+      else {
+        await new Promise(r => setTimeout(r, 2000));
+        tries++;
+      }
     }
 
+    if (reply) {
+      typeMessage(reply);
+    } else {
+      typeMessage("[Sem resposta após timeout]");
+    }
   } catch (err) {
     console.error(err);
     typeMessage("Erro ao consultar servidor.");
