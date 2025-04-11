@@ -1,13 +1,6 @@
 {
     "rewrites": [
-      { "source": "/api/chat", "destination": "/api/chat.js" },
-      { "source": "/api/cron", "destination": "/api/cron.js" }
-    ],
-    "crons": [
-      {
-        "path": "/api/cron",
-        "schedule": "*/1 * * * *"
-      }
+      { "source": "/api/chat", "destination": "/api/chat.js" }
     ]
   }
   
