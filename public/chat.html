@@ -330,7 +330,6 @@
 
   <!-- TOAST DE ALERTA (aparece embaixo à esquerda) -->
   <div id="toast" class="toast"></div>
-  <script src="./key.js"></script>
 
   <script>
     /**********************
@@ -473,9 +472,7 @@ async function fetchAssistantReply(userText) {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        message: userText
-      })
+      body: JSON.stringify({ message: userText })
     });
 
     const data = await response.json();
