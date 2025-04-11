@@ -1,4 +1,3 @@
-// worker.js
 import { createClient } from '@supabase/supabase-js';
 import 'dotenv/config';
 
@@ -62,25 +61,24 @@ async function processPendingMessages() {
     .eq('status', 'pending');
 
   for (const msg of pending) {
-    const threadId = crypto.randomUUID();
     try {
-      // Cria a thread
-      await fetch(`https://api.openai.com/v1/threads`, {
+      const thread = await fetch("https://api.openai.com/v1/threads", {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${OPENAI_API_KEY}`,
           'Content-Type': 'application/json',
           'OpenAI-Beta': 'assistants=v1'
         }
-      });
+      }).then(res => res.json());
 
-      const reply = await runAssistant(threadId, msg.user_text);
+      const reply = await runAssistant(thread.id, msg.user_input);
 
       await supabase.from('messages').update({
         reply,
         status: 'completed'
       }).eq('id', msg.id);
     } catch (e) {
+      console.error("Erro ao processar:", e);
       await supabase.from('messages').update({
         reply: '[Erro ao processar]',
         status: 'error'
