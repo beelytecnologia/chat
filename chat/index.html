@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ChatGPT Clone</title>
+
+  <style>
+    /* RESET BÁSICO */
+    .toast {
+  display: none;
+  position: fixed; 
+  left: 20px;
+  bottom: 20px;
+  background-color: #28a745;
+  color: #fff;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  font-size: 0.85rem;
+  z-index: 999;
+  animation: fadeInUp 0.4s ease forwards;
+}
+.toast.show {
+  display: block;
+}
+@keyframes fadeInUp {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      height: 100%;
+      font-family: Arial, sans-serif;
+    }
+
+    /* =========================
+       VARIÁVEIS DE COR / TEMA
+    ==========================*/
+    :root {
+      /* Modo Claro */
+      --bg-color: #fefefe;
+      --text-color: #333;
+      --border-color: #ccc;
+      --header-bg: #fff;
+      --header-text: #333;
+
+      /* Baloes de msg */
+      --bubble-user-bg: #007acc;
+      --bubble-user-text: #fff;
+      --bubble-bot-bg: #eee;
+      --bubble-bot-text: #333;
+
+      /* Inputs/botoes */
+      --input-bg: #fff;
+      --input-text: #333;
+      --button-bg: #007acc;
+      --button-text: #fff;
+
+      /* Sidebar em modo claro (se quiser diferente do preto) */
+      --sidebar-bg: #ddd;
+      --sidebar-text: #333;
+
+      /* Cor do overlay no mobile */
+      --overlay-bg: rgba(0, 0, 0, 0.3);
+      --overlay-blur: 4px;
+    }
+
+    /* Modo Escuro */
+    html.dark {
+      --bg-color: #1e1e1e;
+      --text-color: #f5f5f5;
+      --border-color: #444;
+      --header-bg: #2a2a2a;
+      --header-text: #f5f5f5;
+
+      --bubble-user-bg: #007acc;
+      --bubble-user-text: #fff;
+      --bubble-bot-bg: #333;
+      --bubble-bot-text: #f5f5f5;
+
+      --input-bg: #2a2a2a;
+      --input-text: #f5f5f5;
+      --button-bg: #007acc;
+      --button-text: #fff;
+
+      /* Sidebar em modo escuro -> preta */
+      --sidebar-bg: #111;
+      --sidebar-text: #ccc;
+
+      /* Overlay no mobile */
+      --overlay-bg: rgba(0, 0, 0, 0.5);
+      --overlay-blur: 6px;
+    }
+
+    body {
+      display: flex;
+      flex-direction: row;
+      background: var(--bg-color);
+      color: var(--text-color);
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden; /* para evitar rolagem indevida */
+    }
+
+    /* ==============
+       OVERLAY (para mobile)
+       ===============*/
+       .overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: none; /* Padrão: oculto */
+  background: var(--overlay-bg);
+  backdrop-filter: blur(var(--overlay-blur));
+  z-index: 10; 
+}
+
+/* Só exibe o overlay no mobile (até 768px) */
+@media (max-width: 768px) {
+  .overlay.show {
+    display: block; /* No mobile, se tiver .show, fica visível */
+  }
+}
+
+    /* =========================
+       SIDEBAR
+    ========================== */
+    .sidebar {
+      background-color: var(--sidebar-bg);
+      color: var(--sidebar-text);
+      border-right: 1px solid var(--border-color);
+
+      display: flex;
+      flex-direction: column;
+
+      /* Largura fixa no desktop */
+      width: 240px;
+      transition: width 0.3s ease;
+      position: relative;
+      z-index: 11; /* acima do overlay */
+    }
+
+    /* Conteúdo da sidebar */
+    .sidebar-header {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .conversations-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+    .conv-item {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .conv-item:hover {
+      background-color: var(--border-color);
+      opacity: 0.8;
+    }
+    .hamburger-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2rem;
+      color: var(--header-text);
+    }
+
+    /* SIDEBAR FECHADA NO DESKTOP -> width 0 */
+    .sidebar.closed {
+      width: 0;
+      overflow: hidden;
+    }
+
+    /* =========================
+       ÁREA PRINCIPAL DO CHAT
+    ========================== */
+    .chat-area {
+      flex: 1; 
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: var(--header-bg);
+      color: var(--header-text);
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .chat-header h1 {
+      font-size: 1rem;
+      margin-left: 0.5rem;
+    }
+    .theme-toggle {
+      background-color: var(--bubble-bot-bg);
+      color: var(--bubble-bot-text);
+      border: none;
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    /* LISTA DE MENSAGENS */
+    .messages-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .message {
+      max-width: 70%;
+      padding: 0.75rem;
+      border-radius: 6px;
+      line-height: 1.4;
+      font-size: 0.9rem;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+    .user-msg {
+      margin-left: auto;
+      background-color: var(--bubble-user-bg);
+      color: var(--bubble-user-text);
+    }
+    .assistant-msg {
+      margin-right: auto;
+      background-color: var(--bubble-bot-bg);
+      color: var(--bubble-bot-text);
+    }
+
+    /* ÁREA DE INPUT */
+    .chat-input {
+      flex-shrink: 0;
+      display: flex;
+      gap: 0.5rem;
+      border-top: 1px solid var(--border-color);
+      padding: 1rem;
+    }
+    .chat-input textarea {
+      flex: 1;
+      resize: none;
+      border: 1px solid var(--border-color);
+      background-color: var(--input-bg);
+      color: var(--input-text);
+      border-radius: 4px;
+      padding: 0.5rem;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .chat-input button {
+      background-color: var(--button-bg);
+      color: var(--button-text);
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .chat-input button:hover {
+      filter: brightness(1.1);
+    }
+
+    /* EFEITO DE DIGITAÇÃO */
+    .typing {
+      border-right: 2px solid currentColor;
+      animation: blink 0.8s steps(1) infinite;
+    }
+    @keyframes blink {
+      50% { border-color: transparent; }
+    }
+
+    /* =========================
+       RESPONSIVIDADE (MOBILE)
+    ========================== */
+    @media (max-width: 768px) {
+      /* No mobile, a sidebar será overlay. 
+         Ela começa "fechada" (width:0) e ao abrir, pega 80% da largura, 
+         sem empurrar o conteúdo (pois é position: fixed). */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 0; /* começa fechada */
+        z-index: 11;
+      }
+      .sidebar.open {
+        width: 80%;
+      }
+      /* No mobile, se quisermos a sidebar "aberta" em desktop, 
+         vamos remover do HTML a classe "closed". 
+         Mas em mobile, forçamos width=0 até abrir. */
+
+      /* O .chat-area ficará sempre fullscreen no mobile, sem espaço p/ sidebar. */
+      .chat-area {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- OVERLAY (fica atrás da sidebar no mobile para escurecer/desfocar o fundo) -->
+  <div id="overlay" class="overlay"></div>
+
+  <!-- SIDEBAR (Aberta no desktop; no mobile é 0 por padrão, mas abrimos com JS) -->
+  <div id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <span>Conversas</span>
+      <button id="closeSidebarBtn" class="hamburger-btn">&times;</button>
+    </div>
+    <div class="conversations-list" id="conversationsList">
+      <!-- preenchido via JS -->
+    </div>
+  </div>
+
+  <!-- ÁREA PRINCIPAL -->
+  <div class="chat-area">
+    <!-- Cabeçalho do chat -->
+    <div class="chat-header">
+      <div style="display:flex; align-items:center;">
+        <button id="openSidebarBtn" class="hamburger-btn" style="margin-right:0.5rem;">&#9776;</button>
+        <h1>Meu ChatGPT Clone</h1>
+      </div>
+      <button id="themeToggleBtn" class="theme-toggle">Modo Claro</button>
+    </div>
+
+    <!-- Container de mensagens -->
+    <div id="messagesContainer" class="messages-container"></div>
+
+    <!-- Área de input -->
+    <div class="chat-input">
+      <textarea
+        id="userInput"
+        rows="2"
+        placeholder="Digite sua mensagem..."
+      ></textarea>
+      <button id="sendBtn">Enviar</button>
+    </div>
+  </div>
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+  <script>
+    // Elementos
+    document.addEventListener('DOMContentLoaded', () => {
+  const toast = document.getElementById('toast');
+  const message = localStorage.getItem('toastMessage');
+  const time = localStorage.getItem('toastTime');
+
+  if (message && time) {
+    const now = Date.now();
+    const diff = now - parseInt(time); // em ms
+
+    if (diff <= 5000) { // só exibe se faz menos de 5s
+      toast.textContent = message;
+      toast.classList.add('show');
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+        localStorage.removeItem('toastMessage');
+        localStorage.removeItem('toastTime');
+      }, 3000);
+    } else {
+      // tempo expirado, não mostra nada
+      localStorage.removeItem('toastMessage');
+      localStorage.removeItem('toastTime');
+    }
+  }
+});
+
+    const htmlEl = document.documentElement;
+    const overlay = document.getElementById('overlay');
+
+    const sidebar = document.getElementById('sidebar');
+    const openSidebarBtn = document.getElementById('openSidebarBtn');
+    const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+
+    const messagesContainer = document.getElementById('messagesContainer');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    const conversationsList = document.getElementById('conversationsList');
+
+    // Modo escuro por padrão
+    let isDarkMode = true;
+
+    // Exemplo de "banco de conversas"
+    let conversations = [
+      {
+        title: "Conversa 1",
+        messages: [
+          { role: "user", content: "Olá, tudo bem?" },
+          { role: "assistant", content: "Oi! Tudo ótimo aqui. Como posso ajudar?" }
+        ]
+      },
+      {
+        title: "Conversa 2",
+        messages: [
+          { role: "user", content: "Qual a capital da França?" },
+          { role: "assistant", content: "A capital da França é Paris." }
+        ]
+      }
+    ];
+    // Índice da conversa atual
+    let currentConversationIndex = 0;
+
+    /* ======================
+       FUNÇÕES DE LAYOUT/TEMA
+    ======================= */
+    function toggleTheme() {
+      isDarkMode = !isDarkMode;
+      if (isDarkMode) {
+        htmlEl.classList.add('dark');
+        themeToggleBtn.textContent = 'Modo Claro';
+      } else {
+        htmlEl.classList.remove('dark');
+        themeToggleBtn.textContent = 'Modo Escuro';
+      }
+    }
+
+    // Abre a sidebar (mobile: 80% width)
+    function openSidebar() {
+      sidebar.classList.add('open');     // no mobile, width=80%
+      sidebar.classList.remove('closed'); 
+      // Mostra overlay no mobile
+      overlay.classList.add('show');
+    }
+
+    // Fecha a sidebar
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      sidebar.classList.add('closed');
+      overlay.classList.remove('show');
+    }
+
+    // Carrega as conversas na sidebar
+    function loadConversationsList() {
+      conversationsList.innerHTML = '';
+      conversations.forEach((conv, idx) => {
+        const item = document.createElement('div');
+        item.className = 'conv-item';
+        item.textContent = conv.title;
+        item.addEventListener('click', () => {
+          currentConversationIndex = idx;
+          renderCurrentConversation();
+          closeSidebar();
+        });
+        conversationsList.appendChild(item);
+      });
+    }
+
+    // Exibe as mensagens da conversa atual
+    function renderCurrentConversation() {
+      messagesContainer.innerHTML = '';
+      const currentConv = conversations[currentConversationIndex];
+      currentConv.messages.forEach(msg => {
+        addMessage(msg.content, msg.role === 'user');
+      });
+    }
+
+    // Cria um balão de mensagem
+    function addMessage(text, isUser = true) {
+      const divMsg = document.createElement('div');
+      divMsg.classList.add('message');
+      divMsg.classList.add(isUser ? 'user-msg' : 'assistant-msg');
+      divMsg.textContent = text;
+
+      messagesContainer.appendChild(divMsg);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    // Efeito de digitação
+    async function typeMessage(text) {
+      const divMsg = document.createElement('div');
+      divMsg.classList.add('message', 'assistant-msg');
+      messagesContainer.appendChild(divMsg);
+
+      let idx = 0;
+      while (idx < text.length) {
+        divMsg.textContent += text.charAt(idx);
+        idx++;
+        await new Promise(r => setTimeout(r, 20));
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+    }
+
+    // Simula resposta do chatbot
+    function simulateChatbotResponse(userText) {
+      const fakeResp = "Resposta simulada: " + userText;
+      // Salva na conversa
+      conversations[currentConversationIndex].messages.push({
+        role: "assistant",
+        content: fakeResp
+      });
+      // Efeito de digitação
+      typeMessage(fakeResp);
+    }
+
+    // Enviar mensagem
+    function onSendMessage() {
+      const text = userInput.value.trim();
+      if (!text) return;
+      userInput.value = '';
+
+      // Mensagem do usuário
+      addMessage(text, true);
+      conversations[currentConversationIndex].messages.push({
+        role: "user",
+        content: text
+      });
+
+      // Resposta simulada
+      setTimeout(() => {
+        simulateChatbotResponse(text);
+      }, 400);
+    }
+
+    // Eventos
+    openSidebarBtn.addEventListener('click', openSidebar);
+    closeSidebarBtn.addEventListener('click', closeSidebar);
+    themeToggleBtn.addEventListener('click', toggleTheme);
+
+    sendBtn.addEventListener('click', onSendMessage);
+    userInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        onSendMessage();
+      }
+    });
+
+    // Inicialização
+    function init() {
+      // Modo escuro já habilitado (por conta do class="dark" no <html>)
+      // Em desktop, a sidebar aparece com width=240px (pois não tem .closed).
+      // Em mobile, ela fica com width=0 até chamar .open no clique.
+      loadConversationsList();
+      renderCurrentConversation();
+    }
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login - Beely</title>
+
+  <!-- Fonte Roboto via Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link 
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" 
+    rel="stylesheet"
+  >
+
+  <style>
+    /* RESET BÁSICO */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      height: 100%;
+      font-family: 'Roboto', sans-serif;
+    }
+    body {
+      background-color: #f9f9f9;
+    }
+
+    /* CONTAINER: duas colunas, ocupando tela toda */
+    .container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      overflow: hidden; 
+    }
+
+    /* COLUNA ESQUERDA */
+    .left-col {
+      flex: 1;
+      background-color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;     
+      justify-content: center; 
+      padding: 2rem;
+      position: relative;
+    }
+
+    /* FORM COMPACTO */
+    .form-wrapper {
+      max-width: 400px;
+      width: 100%;
+    }
+
+    /* TÍTULO E SUBTÍTULO */
+    .title {
+      font-size: 1.4rem;
+      font-weight: 500;
+      margin-bottom: 0.3rem;
+      color: #333;
+    }
+    .subtitle {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 1.5rem;
+    }
+
+    /* GRUPO DE INPUT (LABEL + INPUT) */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    .form-group label {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 0.3rem;
+      color: #333;
+    }
+
+    /* INPUTS */
+    .input {
+      width: 100%;
+      font-size: 0.9rem;
+      padding: 0.6rem 2.2rem 0.6rem 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input:focus {
+      border-color: #f7c900; /* amarelo no foco */
+    }
+
+    /* OLHO: posição e estilo */
+    .password-field {
+      position: relative;
+    }
+    .eye-icon {
+      position: absolute;
+      right: 0.6rem;
+      top: 70%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #999;
+      display: flex;
+      align-items: center;
+    }
+    .eye-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* CHECKBOX AMARELINHO (SEM accent-color) */
+    .remember-row {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 1rem;
+      font-size: 0.85rem;
+    }
+    .remember-row input[type="checkbox"] {
+      appearance: none;      
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #f7c900;
+      border-radius: 4px;
+      background-color: #ffffff;
+      cursor: pointer;
+      position: relative;
+      vertical-align: middle;
+    }
+    /* Quando marcado, exibe um "check" */
+    .remember-row input[type="checkbox"]:checked {
+      border-color: #ffffff;
+      background-color: #f7c900;
+    }
+    .remember-row input[type="checkbox"]:checked::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 5px;
+      width: 3px;
+      height: 6px;
+      border: solid #333;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    /* BOTÃO ARREDONDADO */
+    .btn-login {
+      display: block;
+      width: 100%;
+      padding: 0.7rem 1rem;
+      background-color: #f7c900;
+      color: #333;
+      font-size: 0.95rem;
+      font-weight: bold;
+      text-align: center;
+      border: none;
+      border-radius: 32px;
+      cursor: pointer;
+      margin-bottom: 1.2rem;
+      transition: filter 0.2s;
+      position: relative;
+    }
+    .btn-login:hover {
+      filter: brightness(1.05);
+    }
+    .btn-login:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    /* SPINNER dentro do botão */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      margin-left: 0.5rem;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* REGISTER LINK */
+    .register {
+      text-align: center;
+      font-size: 0.85rem;
+    }
+    .register a {
+      color: #f7c900;
+      text-decoration: none;
+      margin-left: 0.25rem;
+    }
+
+    /* MENSAGEM DE SUCESSO (toast) */
+    .toast {
+      display: none; 
+      position: fixed; 
+      left: 20px;  
+      bottom: 20px; 
+      background-color: #28a745;
+      color: #fff;
+      padding: 0.75rem 1rem;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      font-size: 0.85rem;
+      z-index: 999; /* acima do resto */
+      animation: fadeInUp 0.4s ease forwards; /* suave aparecimento */
+    }
+    /* Para exibir, adicionamos a classe 'show' (display:block) via JS */
+    .toast.show {
+      display: block;
+    }
+
+    /* Animação de aparecer subindo levemente */
+    @keyframes fadeInUp {
+      0% { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* COLUNA DIREITA (fundo amarelo) */
+    .right-col {
+      flex: 1;
+      background-color: #f7c900; 
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .right-logo {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #333;
+    }
+
+    /* RESPONSIVO: ESCONDE DIREITA SE <= 768px */
+    @media (max-width: 768px) {
+      .right-col {
+        display: none;
+      }
+      .left-col {
+        padding: 1rem;
+      }
+      .form-wrapper {
+        max-width: 340px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOAST DE SUCESSO -->
+  <div id="successToast" class="toast">Login realizado com sucesso!</div>
+
+  <div class="container">
+    <!-- COLUNA ESQUERDA -->
+    <div class="left-col">
+      <div class="form-wrapper">
+        <!-- TÍTULO e SUBTÍTULO -->
+        <h1 class="title">Seja bem vindo!</h1>
+        <p class="subtitle">
+          Entre com suas informações para acessar o painel de Administrador.
+        </p>
+
+        <!-- FORM -->
+        <form>
+          <!-- EMAIL -->
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              class="input"
+              placeholder="Digite seu email"
+            />
+          </div>
+
+          <!-- SENHA + ÍCONE OLHO -->
+          <div class="form-group password-field">
+            <label for="senha">Senha</label>
+            <input
+              type="password"
+              id="senha"
+              class="input"
+              placeholder="Digite sua senha"
+            />
+            <!-- Ícone do olho (SVG) -->
+            <span class="eye-icon" id="togglePwd">
+              <!-- O "eye" normal -->
+              <svg fill="none" stroke="currentColor" stroke-linecap="round"
+                stroke-linejoin="round" stroke-width="2"
+                viewBox="0 0 24 24">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </span>
+          </div>
+
+          <!-- LEMBRAR -->
+          <div class="remember-row">
+            <input type="checkbox" id="lembrar"/>
+            <label for="lembrar">Manter conectado</label>
+          </div>
+
+          <!-- BOTÃO -->
+          <button id="btnEntrar" type="button" class="btn-login">Entrar</button>
+
+          <!-- REGISTER LINK -->
+          <div class="register">
+            Não tem uma conta?
+            <a href="#">Registre-se</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- COLUNA DIREITA (fundo amarelo) -->
+    <div class="right-col">
+      <div class="right-logo">Beely</div>
+    </div>
+  </div>
+
+  <script>
+    // ====== MOSTRAR/OCULTAR SENHA ======
+    const togglePwd = document.getElementById('togglePwd');
+    const pwdInput = document.getElementById('senha');
+
+    // Ícones do olho
+    const eyeOpenSVG = `
+      <svg fill="none" stroke="currentColor" stroke-linecap="round"
+           stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+    `;
+    const eyeSlashSVG = `
+      <svg fill="none" stroke="currentColor" stroke-linecap="round"
+           stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M13.875 13.875l-1.125-1.125m6.897-5.052A10.052 
+                 10.052 0 0 1 21 12s-4 8-9 8a8.95 8.95 0 0 1-3.337-.652m-3.49-2.335A9.984 
+                 9.984 0 0 1 3 12s1.711-3.422 4.27-5.63"/>
+        <path d="M1 1l22 22"/>
+      </svg>
+    `;
+
+    let showingPwd = false;
+
+    togglePwd.addEventListener('click', () => {
+      showingPwd = !showingPwd;
+      if (showingPwd) {
+        pwdInput.type = 'text';
+        togglePwd.innerHTML = eyeSlashSVG;
+      } else {
+        pwdInput.type = 'password';
+        togglePwd.innerHTML = eyeOpenSVG;
+      }
+    });
+
+    // ====== BOTÃO ENTRAR / TOAST ======
+    const btnEntrar = document.getElementById('btnEntrar');
+    const toast = document.getElementById('successToast');
+
+    btnEntrar.addEventListener('click', () => {
+      // Desabilita o botão para evitar múltiplos cliques
+      btnEntrar.disabled = true;
+      localStorage.setItem('toastMessage', 'Login realizado com sucesso!');
+localStorage.setItem('toastTime', Date.now()); // salva hora atual
+
+      // Mostra o "Entrando..." com spinner
+      btnEntrar.innerHTML = 'Entrando... <span class="spinner"></span>';
+
+      // Simula processo de login (2s)
+        // Exibe o toast (canto inferior esquerdo)
+        // toast.classList.add('show');
+
+        // Aguarda 1 segundo antes de redirecionar
+        setTimeout(() => {
+          window.location.href = '../chat/index.html';
+        }, 1000);
+
+      }, 1000);
+  </script>
+</body>
+</html>
