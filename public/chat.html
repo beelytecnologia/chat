@@ -137,6 +137,7 @@
       .sidebar.open {
         width: 80%;
       }
+      
     }
 
     /* Cabeçalho da sidebar */
@@ -285,6 +286,14 @@
       0% { opacity: 0; transform: translateY(10px); }
       100% { opacity: 1; transform: translateY(0); }
     }
+    @media (min-width: 769px) {
+  #openSidebarBtn {
+    display: inline-block;
+  }
+  .sidebar:not(.closed) ~ .chat-area .chat-header #openSidebarBtn {
+    display: none;
+  }
+}
   </style>
 </head>
 
@@ -313,7 +322,7 @@
     <div class="chat-header">
       <div style="display:flex; align-items:center;">
         <button id="openSidebarBtn" class="hamburger-btn">&#9776;</button>
-        <h1 style="margin-left:0.5rem;">Meu Chat</h1>
+        <h1 style="margin-left:0.5rem;margin-top: 4px;">Key da Bio 🔑</h1>
       </div>
       <button id="themeToggleBtn" class="theme-toggle">Modo Claro</button>
     </div>
