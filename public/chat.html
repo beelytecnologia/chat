@@ -504,6 +504,25 @@
 
   fileInput.value = '';
 });
+document.addEventListener('paste', async (e) => {
+  const items = e.clipboardData?.items;
+  if (!items) return;
+
+  for (const item of items) {
+    if (item.type.indexOf('image') !== -1) {
+      const blob = item.getAsFile();
+      if (!blob) return;
+
+      // Oculta intro, mostra imagem no chat
+      if (introMessage) introMessage.style.display = 'none';
+
+      addImageMessage(URL.createObjectURL(blob));
+      sendFileToAssistant(blob);
+
+      break;
+    }
+  }
+});
 
 
 
@@ -530,17 +549,22 @@ function addImageMessage(imageUrl) {
 async function sendFileToAssistant(file) {
   const formData = new FormData();
   formData.append("message", `Analise o arquivo: ${file.name}`);
-  formData.append("file", file); // o próprio arquivo
+  formData.append("file", file);
+
+  // Mostra o loader de bolinhas enquanto espera resposta
+  const loadingEl = addLoadingDots();
 
   try {
     const response = await fetch("https://n8n.grupobeely.com.br/webhook/5f23d880-6734-46ae-8bd1-4d5a0a8f1445", {
       method: "POST",
-      body: formData // sem headers aqui
+      body: formData
     });
 
     const resultText = await response.text();
 
-    // Se a resposta for JSON
+    // Remove o loader
+    removeLoadingDots(loadingEl);
+
     try {
       const data = JSON.parse(resultText);
       if (data.output) {
@@ -553,9 +577,11 @@ async function sendFileToAssistant(file) {
     }
   } catch (err) {
     console.error("Erro ao enviar arquivo:", err);
+    removeLoadingDots(loadingEl);
     await typeMessage("Erro ao enviar o arquivo.");
   }
 }
+
 
     /**********************
      * 1) TEMA (claro/escuro)
