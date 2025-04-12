@@ -538,23 +538,26 @@
     }
 
     function onSendMessage() {
-      if (isTyping) return;
+  if (isTyping) return;
 
-      const text = userInput.value.trim();
-      if (!text) return;
-      userInput.value = '';
-      if (introMessage) introMessage.style.display = 'none';
+  const text = userInput.value.trim();
+  if (!text) return;
 
-      // User message
-      addMessage(text, true);
-      conversations[currentConversationIndex].messages.push({
-        role: "user",
-        content: text
-      });
+  userInput.value = '';
+  userInput.disabled = true;
+  sendBtn.disabled = true;
 
-      fetchAssistantReply(text);
+  if (introMessage) introMessage.style.display = 'none';
 
-    }
+  addMessage(text, true);
+  conversations[currentConversationIndex].messages.push({
+    role: "user",
+    content: text
+  });
+
+  fetchAssistantReply(text);
+}
+
     function addLoadingDots() {
   const loadingEl = document.createElement("div");
   loadingEl.className = "message assistant-msg loading-dots";
@@ -573,7 +576,7 @@ function removeLoadingDots(el) {
 }
 
 async function typeMessage(text) {
-  isTyping = true; // Impede novos envios
+  isTyping = true;
 
   const div = document.createElement('div');
   div.classList.add('message', 'assistant-msg');
@@ -587,8 +590,12 @@ async function typeMessage(text) {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
   }
 
-  isTyping = false; // Libera novos envios
+  isTyping = false;
+  userInput.disabled = false;
+  sendBtn.disabled = false;
+  userInput.focus();
 }
+
 
 async function fetchAssistantReply(userText) {
   try {
@@ -617,7 +624,7 @@ async function fetchAssistantReply(userText) {
     if (data.output) {
       removeLoadingDots(loadingEl);
 
-      typeMessage(data.output);
+      await typeMessage(data.output);
 
       conversations[currentConversationIndex].messages.push({
         role: "assistant",
@@ -680,11 +687,13 @@ async function fetchAssistantReply(userText) {
 
       sendBtn.addEventListener('click', onSendMessage);
       userInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          onSendMessage();
-        }
-      });
+  if (isTyping) return;
+
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    onSendMessage();
+  }
+});
 
       loadConversationsList();
       renderCurrentConversation();
