@@ -353,7 +353,14 @@
   text-decoration: underline;
   opacity: 0.8;
 }
-
+.msg{
+  margin-top: 10px; width: 45%; text-align: center;
+}
+@media (max-width: 889px) {
+  .msg{
+    width: 95%;
+  }
+}
   </style>
 </head>
 
@@ -395,7 +402,7 @@
     <div id="introMessage" style=" margin-top: 15px;display: flex; flex-direction: column; width: 100%; justify-content: center; align-items: center;">
       <img style="height: 80px; width: 80px;" src="./Frame.png" alt="">
       <h1 style="margin-left:0.5rem;margin-top: 4px;">Key da Bio 🔑</h1>
-      <p style="margin-top: 10px; width: 45%; text-align: center;">Oie! Eu sou a Key da Bio, sua assistente estratégica de Instagram. Te ajudo a analisar seu perfil, ajustar a bio, destravar seu posicionamento e criar uma presença mais atrativa, leve e estratégica — sem complicação.</p>
+      <p class="msg" >Oie! Eu sou a Key da Bio, sua assistente estratégica de Instagram. Te ajudo a analisar seu perfil, ajustar a bio, destravar seu posicionamento e criar uma presença mais atrativa, leve e estratégica — sem complicação.</p>
     </div>
     <!-- Área de Mensagens -->
     <div id="messagesContainer" class="messages-container">
