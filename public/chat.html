@@ -333,6 +333,26 @@
     opacity: 1;
   }
 }
+.sidebar-logout {
+  padding: 1rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-start;
+}
+
+.logout-btn {
+  background-color: transparent;
+  color: var(--sidebar-text);
+  border: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.logout-btn:hover {
+  text-decoration: underline;
+  opacity: 0.8;
+}
 
   </style>
 </head>
@@ -354,6 +374,10 @@
     <div class="conversations-list" id="conversationsList">
       <!-- Itens inseridos via JS -->
     </div>
+    <div class="sidebar-logout">
+      <button onclick="logout()" class="logout-btn">Logout</button>
+    </div>
+    
   </div>
 
   <!-- CONTEÚDO PRINCIPAL DO CHAT -->
@@ -441,6 +465,9 @@
         themeToggleBtn.textContent = 'Modo Escuro';
       }
     }
+    function logout() {
+  window.location.href = "index.html"; // ou a URL da sua página de login
+}
 
     /**********************
      * 2) SIDEBAR - abrir/fechar
