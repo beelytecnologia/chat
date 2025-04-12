@@ -409,10 +409,10 @@
       <p class="msg" >Oie! Eu sou a Key da Bio, sua assistente estratégica de Instagram. Te ajudo a analisar seu perfil, ajustar a bio, destravar seu posicionamento e criar uma presença mais atrativa, leve e estratégica — sem complicação.</p>
     </div>
     <!-- Área de Mensagens -->
-    <div style="margin-bottom: 9px;" id="messagesContainer" class="messages-container">
+    <div  id="messagesContainer" class="messages-container">
  
     </div>
-    <div style="height: 70px;">
+    <div style="height: 60px;">
 
     </div>
 
@@ -431,6 +431,8 @@
     /**********************
      * VARIÁVEIS / ELEMENTOS
      **********************/
+     let isTyping = false;
+
     const htmlEl         = document.documentElement;
     const overlay        = document.getElementById('overlay');
     const sidebar        = document.getElementById('sidebar');
@@ -536,6 +538,8 @@
     }
 
     function onSendMessage() {
+      if (isTyping) return;
+
       const text = userInput.value.trim();
       if (!text) return;
       userInput.value = '';
@@ -568,7 +572,9 @@ function removeLoadingDots(el) {
   if (el && el.remove) el.remove();
 }
 
-    async function typeMessage(text) {
+async function typeMessage(text) {
+  isTyping = true; // Impede novos envios
+
   const div = document.createElement('div');
   div.classList.add('message', 'assistant-msg');
   messagesContainer.appendChild(div);
@@ -580,7 +586,10 @@ function removeLoadingDots(el) {
     await new Promise(resolve => setTimeout(resolve, 15));
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
   }
+
+  isTyping = false; // Libera novos envios
 }
+
 async function fetchAssistantReply(userText) {
   try {
     const loadingEl = addLoadingDots();
