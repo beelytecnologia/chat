@@ -12,7 +12,7 @@
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" 
     rel="stylesheet"
   >
-  <link rel="icon" href="./avata-beely-amarelo-1024x1024.png.png" type="image/png" />
+  <link rel="icon" href="./img/avata-beely-amarelo-1024x1024.png.png" type="image/png" />
 
 
   <style>
@@ -257,12 +257,17 @@
         overflow: hidden;
       }
     }
+    .error-toast {
+  background-color: #dc3545; /* vermelho para erro */
+}
   </style>
 </head>
 <body>
 
   <!-- TOAST DE SUCESSO -->
   <div id="successToast" class="toast">Login realizado com sucesso!</div>
+<!-- TOAST DE ERRO -->
+<div id="errorToast" class="toast error-toast">Erro ao tentar login.</div>
 
   <div class="container">
     <!-- COLUNA ESQUERDA -->
@@ -328,7 +333,7 @@
 
     <!-- COLUNA DIREITA (fundo amarelo) -->
     <div class="right-col">
-      <div class="right-logo"><img src="./logo-beely-black.png (1).png" alt=""></div>
+      <div class="right-logo"><img src="./img/logo-beely-black.png (1).png" alt=""></div>
     </div>
   </div>
 
@@ -367,30 +372,75 @@
         togglePwd.innerHTML = eyeOpenSVG;
       }
     });
-
-    // ====== BOTÃO ENTRAR / TOAST ======
     const btnEntrar = document.getElementById('btnEntrar');
-    const toast = document.getElementById('successToast');
+const toastSuccess = document.getElementById('successToast');
+const toastError = document.getElementById('errorToast');
 
-    btnEntrar.addEventListener('click', () => {
-      // Desabilita o botão para evitar múltiplos cliques
-      btnEntrar.disabled = true;
+function showErrorToast(message) {
+  toastError.textContent = message;
+  toastError.classList.add("show");
+
+  setTimeout(() => {
+    toastError.classList.remove("show");
+  }, 3000);
+}
+
+
+btnEntrar.addEventListener('click', async () => {
+  const email = document.getElementById('email').value.trim();
+  const senha = document.getElementById('senha').value.trim();
+
+  if (!email || !senha) {
+    showErrorToast("Preencha email e senha.");
+    return;
+  }
+
+  btnEntrar.disabled = true;
+  btnEntrar.innerHTML = 'Entrando... <span class="spinner"></span>';
+
+  try {
+    const res = await fetch("https://n8n.grupobeely.com.br/webhook/login/aichat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password: senha })
+    });
+
+    console.log("Status da resposta:", res.status);
+    const result = await res.json();
+    console.log("Resposta do n8n:", result);
+
+    const user = result;
+
+    if (!user || typeof user.is_approved === "undefined") {
+      showErrorToast("Resposta inválida do servidor.");
+      btnEntrar.disabled = false;
+      btnEntrar.innerHTML = 'Entrar';
+      return;
+    }
+
+    if (user.is_approved) {
+      localStorage.setItem("user_id", result.user_id);
+localStorage.setItem("thread_id", result.thread_id);
+localStorage.setItem("user_email", email); // pode manter pra outras requisições
       localStorage.setItem('toastMessage', 'Login realizado com sucesso!');
-localStorage.setItem('toastTime', Date.now()); // salva hora atual
+      localStorage.setItem('toastTime', Date.now());
+      localStorage.setItem('max_questions', user.max_questions);
+      localStorage.setItem('used_questions', user.used_questions);
+      window.location.href = './chat.html';
+    } else {
+      showErrorToast("Seu acesso ainda não foi aprovado.");
+      btnEntrar.disabled = false;
+      btnEntrar.innerHTML = 'Entrar';
+    }
+  } catch (error) {
+    console.error("Erro na requisição:", error);
+    showErrorToast("Erro ao tentar login. Tente novamente.");
+    btnEntrar.disabled = false;
+    btnEntrar.innerHTML = 'Entrar';
+  }
+});
 
-      // Mostra o "Entrando..." com spinner
-      btnEntrar.innerHTML = 'Entrando... <span class="spinner"></span>';
 
-      // Simula processo de login (2s)
-        // Exibe o toast (canto inferior esquerdo)
-        // toast.classList.add('show');
-
-        // Aguarda 1 segundo antes de redirecionar
-        setTimeout(() => {
-          window.location.href = './chat.html';
-        }, 1000);
-
-      }, 1000);
   </script>
 </body>
 </html>
