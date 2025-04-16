@@ -34,8 +34,7 @@
   <div id="overlay" class="overlay"></div>
 
   <!-- SIDEBAR: começa FECHADA no mobile -->
-  <!-- Adicionamos "closed" pra ficar width=0 no desktop também, 
-       MAS vamos abrir via CSS se for tela grande. -->
+
   <div id="sidebar" class="sidebar closed">
   
     <div class="sidebar-header">
@@ -596,9 +595,21 @@ document.getElementById("cancelEdit").addEventListener("click", () => {
 
 document.getElementById("confirmEdit").addEventListener("click", async () => {
   const newTitle = document.getElementById("editInput").value.trim();
-  if (!newTitle || editTargetIndex === null) return;
+  if (!newTitle) return;
 
-  const threadId = conversations[editTargetIndex].threadId;
+  let threadId;
+
+  // Usa o threadId da conversa editada se possível, senão pega do localStorage
+  if (editTargetIndex !== null && conversations[editTargetIndex]) {
+    threadId = conversations[editTargetIndex].threadId;
+  } else {
+    threadId = localStorage.getItem("thread_id");
+  }
+
+  if (!threadId) {
+    alert("Erro: não foi possível encontrar a conversa.");
+    return;
+  }
 
   try {
     const res = await fetch("https://n8n.grupobeely.com.br/webhook/editar-conversa", {
@@ -609,15 +620,15 @@ document.getElementById("confirmEdit").addEventListener("click", async () => {
 
     const result = await res.json();
     if (result.success) {
-      // Atualiza localmente
       const finalTitle = result.title || newTitle;
-conversations[editTargetIndex].title = finalTitle;
 
-const convItems = document.querySelectorAll(".conv-item");
-const titleSpan = convItems[editTargetIndex]?.querySelector("span");
-if (titleSpan) titleSpan.textContent = finalTitle;
+      // Atualiza localmente
+      const conv = conversations.find(c => c.threadId === threadId);
+      if (conv) conv.title = finalTitle;
 
+      loadConversationsList();
     }
+
   } catch (err) {
     console.error("Erro ao editar conversa:", err);
     alert("Erro ao atualizar conversa.");
@@ -626,6 +637,7 @@ if (titleSpan) titleSpan.textContent = finalTitle;
   document.getElementById("editModal").classList.add("hidden");
   editTargetIndex = null;
 });
+
 
 
 
