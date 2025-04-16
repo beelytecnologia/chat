@@ -327,6 +327,8 @@ hasMoreMessages = true;
   if (e.target.closest('.menu-btn') || e.target.closest('.menu-actions')) return;
 
   currentConversationIndex = idx;
+  localStorage.setItem("thread_id", conversations[idx].threadId); // ATUALIZA AQUI
+
   renderCurrentConversation();
   closeSidebar();
 });
@@ -563,6 +565,8 @@ async function fetchAssistantReply(userText) {
       // Salva o novo thread_id se retornado
       if (data.threadId) {
         conversations[currentConversationIndex].threadId = data.threadId;
+        localStorage.setItem("thread_id", data.threadId); // 👈 salva pra garantir
+
       }
 
     } else {
