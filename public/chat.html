@@ -191,7 +191,7 @@ async function sendFileToAssistant(file) {
   const formData = new FormData();
   formData.append("message", `Analise o arquivo: ${file.name}`);
   formData.append("file", file);
-  formData.append("thread_id", conversations[currentConversationIndex].threadId);
+  formData.append("thread_id", localStorage.getItem("thread_id"));
   formData.append("user_id", localStorage.getItem("user_id"));
 
   const loadingEl = addLoadingDots();
