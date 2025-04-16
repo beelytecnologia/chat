@@ -157,6 +157,8 @@
         border-bottom: 1px solid var(--border-color);
         cursor: pointer;
         font-size: 0.85rem;
+        display: flex;
+        align-items: center;
       }
       .conv-item:hover {
         background-color: var(--border-color);
@@ -186,13 +188,16 @@
         margin-left: 0.5rem;
       }
       .theme-toggle {
-        background-color: var(--bubble-bot-bg);
+        background-color: var(--header-bg);
         color: var(--bubble-bot-text);
         border: none;
         padding: 0.4rem 0.8rem;
         border-radius: 4px;
         cursor: pointer;
         font-size: 0.8rem;
+        align-items: center;
+        display: flex
+    ;
       }
   
       /* LISTA DE MENSAGENS */
@@ -397,3 +402,123 @@
   .messages-container {
     scrollbar-color: var(--border-color) transparent;
   }
+  .new-conv-button {
+    text-align: start;
+    padding: 10px;
+  }
+  .new-conv-button button {
+    padding: 6px 12px;
+    font-size: 14px;
+    background-color: #444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .new-conv-button button:hover {
+    color: #666;
+  }
+  .menu-btn {
+  background: transparent;
+  color: white;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.menu-actions {
+  position: absolute;
+  right: 10px;
+  background-color: #222;
+  border: 1px solid #444;
+  padding: 5px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 100;
+}
+
+.menu-actions.hidden {
+  display: none;
+}
+
+.menu-actions button {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+}
+.menu-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: none;
+  background-color: transparent;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.menu-btn img {
+  width: 16px;
+  height: 16px;
+}
+
+.edit-btn:hover {
+  color: #6b6b6b;
+}
+
+.delete-btn:hover {
+  color: #444;
+}
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: #1e1e1e;
+  padding: 1.5rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 320px;
+  text-align: center;
+}
+
+.modal-buttons {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.modal-buttons button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#cancelDelete {
+  background-color: #ccc;
+}
+
+#confirmDelete {
+  background-color: #e74c3c;
+  color: white;
+}

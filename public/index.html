@@ -13,254 +13,8 @@
     rel="stylesheet"
   >
   <link rel="icon" href="./img/avata-beely-amarelo-1024x1024.png.png" type="image/png" />
+<link rel="stylesheet" href="./css/index.css">
 
-
-  <style>
-    /* RESET BÁSICO */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    html, body {
-      height: 100%;
-      font-family: 'Roboto', sans-serif;
-    }
-    body {
-      background-color: #f9f9f9;
-    }
-
-    /* CONTAINER: duas colunas, ocupando tela toda */
-    .container {
-      width: 100vw;
-      height: 100vh;
-      display: flex;
-      overflow: hidden; 
-    }
-
-    /* COLUNA ESQUERDA */
-    .left-col {
-      flex: 1;
-      background-color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;     
-      justify-content: center; 
-      padding: 2rem;
-      position: relative;
-    }
-
-    /* FORM COMPACTO */
-    .form-wrapper {
-      max-width: 400px;
-      width: 100%;
-    }
-
-    /* TÍTULO E SUBTÍTULO */
-    .title {
-      font-size: 1.4rem;
-      font-weight: 500;
-      margin-bottom: 0.3rem;
-      color: #333;
-    }
-    .subtitle {
-      font-size: 0.9rem;
-      color: #666;
-      margin-bottom: 1.5rem;
-    }
-
-    /* GRUPO DE INPUT (LABEL + INPUT) */
-    .form-group {
-      margin-bottom: 1rem;
-    }
-    .form-group label {
-      display: block;
-      font-size: 0.9rem;
-      margin-bottom: 0.3rem;
-      color: #333;
-    }
-
-    /* INPUTS */
-    .input {
-      width: 100%;
-      font-size: 0.9rem;
-      padding: 0.6rem 2.2rem 0.6rem 0.6rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .input:focus {
-      border-color: #f7c900; /* amarelo no foco */
-    }
-
-    /* OLHO: posição e estilo */
-    .password-field {
-      position: relative;
-    }
-    .eye-icon {
-      position: absolute;
-      right: 0.6rem;
-      top: 70%;
-      transform: translateY(-50%);
-      cursor: pointer;
-      color: #999;
-      display: flex;
-      align-items: center;
-    }
-    .eye-icon svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    /* CHECKBOX AMARELINHO (SEM accent-color) */
-    .remember-row {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      margin-bottom: 1rem;
-      font-size: 0.85rem;
-    }
-    .remember-row input[type="checkbox"] {
-      appearance: none;      
-      -webkit-appearance: none;
-      width: 18px;
-      height: 18px;
-      border: 2px solid #f7c900;
-      border-radius: 4px;
-      background-color: #ffffff;
-      cursor: pointer;
-      position: relative;
-      vertical-align: middle;
-    }
-    /* Quando marcado, exibe um "check" */
-    .remember-row input[type="checkbox"]:checked {
-      border-color: #ffffff;
-      background-color: #f7c900;
-    }
-    .remember-row input[type="checkbox"]:checked::after {
-      content: '';
-      position: absolute;
-      top: 2px;
-      left: 5px;
-      width: 3px;
-      height: 6px;
-      border: solid #333;
-      border-width: 0 2px 2px 0;
-      transform: rotate(45deg);
-    }
-
-    /* BOTÃO ARREDONDADO */
-    .btn-login {
-      display: block;
-      width: 100%;
-      padding: 0.7rem 1rem;
-      background-color: #f7c900;
-      color: #333;
-      font-size: 0.95rem;
-      font-weight: bold;
-      text-align: center;
-      border: none;
-      border-radius: 32px;
-      cursor: pointer;
-      margin-bottom: 1.2rem;
-      transition: filter 0.2s;
-      position: relative;
-    }
-    .btn-login:hover {
-      filter: brightness(1.05);
-    }
-    .btn-login:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
-
-    /* SPINNER dentro do botão */
-    .spinner {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      margin-left: 0.5rem;
-      border: 2px solid #fff;
-      border-radius: 50%;
-      border-top-color: transparent;
-      animation: spin 0.6s linear infinite;
-      vertical-align: middle;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* REGISTER LINK */
-    .register {
-      text-align: center;
-      font-size: 0.85rem;
-    }
-    .register a {
-      color: #f7c900;
-      text-decoration: none;
-      margin-left: 0.25rem;
-    }
-
-    /* MENSAGEM DE SUCESSO (toast) */
-    .toast {
-      display: none; 
-      position: fixed; 
-      left: 20px;  
-      bottom: 20px; 
-      background-color: #28a745;
-      color: #fff;
-      padding: 0.75rem 1rem;
-      border-radius: 4px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      font-size: 0.85rem;
-      z-index: 999; /* acima do resto */
-      animation: fadeInUp 0.4s ease forwards; /* suave aparecimento */
-    }
-    /* Para exibir, adicionamos a classe 'show' (display:block) via JS */
-    .toast.show {
-      display: block;
-    }
-
-    /* Animação de aparecer subindo levemente */
-    @keyframes fadeInUp {
-      0% { opacity: 0; transform: translateY(10px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-
-    /* COLUNA DIREITA (fundo amarelo) */
-    .right-col {
-      flex: 1;
-      background-color: #f7c900; 
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .right-logo {
-      font-size: 1.8rem;
-      font-weight: bold;
-      color: #333;
-    }
-
-    /* RESPONSIVO: ESCONDE DIREITA SE <= 768px */
-    @media (max-width:880px) {
-      .right-col {
-        display: none;
-      }
-      .left-col {
-        padding: 1rem;
-      }
-      .form-wrapper {
-        max-width: 340px;
-      }
-      body{
-        overflow: hidden;
-      }
-    }
-    .error-toast {
-  background-color: #dc3545; /* vermelho para erro */
-}
-  </style>
 </head>
 <body>
 
@@ -385,8 +139,40 @@ function showErrorToast(message) {
   }, 3000);
 }
 
+function showSuccessToast(message) {
+  toastSuccess.textContent = message;
+  toastSuccess.classList.add("show");
 
-btnEntrar.addEventListener('click', async () => {
+  setTimeout(() => {
+    toastSuccess.classList.remove("show");
+  }, 3000);
+}
+
+const registerLink = document.querySelector(".register a");
+const title = document.querySelector(".title");
+const subtitle = document.querySelector(".subtitle");
+let isRegistering = false;
+registerLink.addEventListener("click", (e) => {
+  e.preventDefault();
+  isRegistering = true;
+
+  // Troca título e subtítulo
+  title.textContent = "Crie sua conta";
+  subtitle.textContent = "Preencha os campos para se registrar na plataforma.";
+  
+  // Esconde o checkbox
+  document.querySelector(".remember-row").style.display = "none";
+  
+  // Altera o texto do botão
+  btnEntrar.textContent = "Registrar";
+
+  // Esconde o link de registro
+  registerLink.parentElement.style.display = "none";
+});
+
+
+// Adapte a lógica do botão para envio de cadastro se estiver registrando
+btnEntrar.addEventListener("click", async () => {
   const email = document.getElementById('email').value.trim();
   const senha = document.getElementById('senha').value.trim();
 
@@ -396,38 +182,60 @@ btnEntrar.addEventListener('click', async () => {
   }
 
   btnEntrar.disabled = true;
-  btnEntrar.innerHTML = 'Entrando... <span class="spinner"></span>';
+  btnEntrar.innerHTML = isRegistering 
+    ? 'Registrando... <span class="spinner"></span>' 
+    : 'Entrando... <span class="spinner"></span>';
+
+  const url = isRegistering
+    ? "https://n8n.grupobeely.com.br/webhook/registrar"
+    : "https://n8n.grupobeely.com.br/webhook/login/aichat";
 
   try {
-    const res = await fetch("https://n8n.grupobeely.com.br/webhook/login/aichat", {
+    const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password: senha })
     });
 
-    console.log("Status da resposta:", res.status);
     const result = await res.json();
-    console.log("Resposta do n8n:", result);
 
-    const user = result;
+    if (isRegistering) {
+      isRegistering = false;
+      showSuccessToast("Cadastro realizado com sucesso!");
 
-    if (!user || typeof user.is_approved === "undefined") {
+  title.textContent = "Seja bem vindo!";
+  subtitle.textContent = "Entre com suas informações para acessar o painel de Administrador.";
+  document.querySelector(".remember-row").style.display = "flex";
+  registerLink.parentElement.style.display = "";
+  btnEntrar.textContent = "Entrar";
+  btnEntrar.disabled = false;
+  return;
+    }
+
+    if (!result || typeof result.is_approved === "undefined") {
       showErrorToast("Resposta inválida do servidor.");
       btnEntrar.disabled = false;
       btnEntrar.innerHTML = 'Entrar';
       return;
     }
 
-    if (user.is_approved) {
-      localStorage.setItem("user_id", result.user_id);
-localStorage.setItem("thread_id", result.thread_id);
-localStorage.setItem("user_email", email); // pode manter pra outras requisições
-      localStorage.setItem('toastMessage', 'Login realizado com sucesso!');
-      localStorage.setItem('toastTime', Date.now());
-      localStorage.setItem('max_questions', user.max_questions);
-      localStorage.setItem('used_questions', user.used_questions);
-      window.location.href = './chat.html';
-    } else {
+    if (result.is_approved) {
+  // Limpa qualquer dado anterior
+  localStorage.clear();
+
+  // Salva dados novos do usuário
+  localStorage.setItem("user_id", result.user_id);
+  localStorage.setItem("thread_id", result.thread_id);
+  localStorage.setItem("user_email", email);
+  localStorage.setItem("toastMessage", "Login realizado com sucesso!");
+  localStorage.setItem("toastTime", Date.now());
+  localStorage.setItem("max_questions", result.max_questions);
+  localStorage.setItem("used_questions", result.used_questions);
+
+  // Redireciona para o chat
+  window.location.href = "./chat.html";
+}
+else {
       showErrorToast("Seu acesso ainda não foi aprovado.");
       btnEntrar.disabled = false;
       btnEntrar.innerHTML = 'Entrar';
@@ -436,10 +244,9 @@ localStorage.setItem("user_email", email); // pode manter pra outras requisiçõ
     console.error("Erro na requisição:", error);
     showErrorToast("Erro ao tentar login. Tente novamente.");
     btnEntrar.disabled = false;
-    btnEntrar.innerHTML = 'Entrar';
+    btnEntrar.innerHTML = isRegistering ? 'Registrar' : 'Entrar';
   }
 });
-
 
   </script>
 </body>

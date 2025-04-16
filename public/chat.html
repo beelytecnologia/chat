@@ -9,8 +9,27 @@
 </head>
 
 <body>
-
-  <!-- OVERLAY (para mobile) -->
+  <!-- (MODAL) -->
+  <div id="confirmModal" class="modal hidden">
+    <div class="modal-content">
+      <p>Tem certeza que deseja excluir essa conversa?</p>
+      <div class="modal-buttons">
+        <button id="cancelDelete">Cancelar</button>
+        <button id="confirmDelete">Excluir</button>
+      </div>
+    </div>
+  </div>
+  <div id="editModal" class="modal hidden">
+    <div class="modal-content">
+      <p>Editar nome da conversa:</p>
+      <input id="editInput" type="text" placeholder="Novo título" style="width: 100%; padding: 0.5rem; margin-top: 10px;" />
+      <div class="modal-buttons" style="margin-top: 1rem;">
+        <button id="cancelEdit">Cancelar</button>
+        <button id="confirmEdit">Salvar</button>
+      </div>
+    </div>
+  </div>
+  
   <div id="overlay" class="overlay"></div>
 
   <!-- SIDEBAR: começa FECHADA no mobile -->
@@ -21,6 +40,9 @@
     <div class="sidebar-header">
       <span>Chats</span>
       <button id="closeSidebarBtn" class="hamburger-btn">&times;</button>
+    </div>
+    <div class="new-conv-button">
+      <button onclick="createNewConversation()">+</button>
     </div>
     <div class="conversations-list" id="conversationsList">
       <!-- Itens inseridos via JS -->
@@ -41,7 +63,7 @@
       </div>
     
 
-      <button id="themeToggleBtn" class="theme-toggle">Modo Claro</button>
+      <button id="themeToggleBtn" class="theme-toggle"><img style="width: 16px;height: 16px;" src="./img/controle-de-brilho.png" alt=""></button>
     </div>
     <div id="introMessage" style=" margin-top: 15px;display: flex; flex-direction: column; width: 100%; justify-content: center; align-items: center;">
       <img style="height: 80px; width: 80px;" src="./Frame.png" alt="">
@@ -210,10 +232,8 @@ async function sendFileToAssistant(file) {
       isDarkMode = !isDarkMode;
       if (isDarkMode) {
         htmlEl.classList.add('dark');
-        themeToggleBtn.textContent = 'Modo Claro';
       } else {
         htmlEl.classList.remove('dark');
-        themeToggleBtn.textContent = 'Modo Escuro';
       }
     }
     function logout() {
@@ -266,20 +286,61 @@ hasMoreMessages = true;
     /**********************
      * 3) LISTA DE CONVERSAS
      **********************/
-    function loadConversationsList() {
-      conversationsList.innerHTML = '';
-      conversations.forEach((conv, idx) => {
-        const item = document.createElement('div');
-        item.className = 'conv-item';
-        item.textContent = conv.title;
-        item.addEventListener('click', () => {
-          currentConversationIndex = idx;
-          renderCurrentConversation();
-          closeSidebar();
-        });
-        conversationsList.appendChild(item);
-      });
-    }
+     function loadConversationsList() {
+  conversationsList.innerHTML = '';
+
+  conversations.forEach((conv, idx) => {
+    const item = document.createElement('div');
+    item.className = 'conv-item';
+
+    const title = document.createElement('span');
+    title.textContent = conv.title;
+
+    const menuBtn = document.createElement('button');
+    menuBtn.innerHTML = '⋯';
+    menuBtn.className = 'menu-btn';
+
+    const menu = document.createElement('div');
+    menu.className = 'menu-actions hidden';
+    menu.innerHTML = `
+  <button class="menu-btn edit-btn" onclick="editConversation(${idx})">
+    <img src="./img/botao-editar.png" alt=""> Editar
+  </button>
+  <button class="menu-btn delete-btn" onclick="deleteConversation(${idx})">
+    <img src="./img/excluir.png" alt=""> Excluir
+  </button>
+`;
+
+
+    menuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.querySelectorAll('.menu-actions').forEach(m => m.classList.add('hidden'));
+      menu.classList.toggle('hidden');
+    });
+
+    item.appendChild(title);
+    item.appendChild(menuBtn);
+    item.appendChild(menu);
+
+    item.addEventListener('click', (e) => {
+  // Ignora cliques vindos do botão de menu ou seus filhos
+  if (e.target.closest('.menu-btn') || e.target.closest('.menu-actions')) return;
+
+  currentConversationIndex = idx;
+  renderCurrentConversation();
+  closeSidebar();
+});
+
+
+    conversationsList.appendChild(item);
+  });
+
+  // fecha menus abertos ao clicar fora
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.menu-actions').forEach(m => m.classList.add('hidden'));
+  });
+}
+
 
     function renderCurrentConversation() {
   messagesContainer.innerHTML = '';
@@ -514,6 +575,120 @@ async function fetchAssistantReply(userText) {
   }
 }
 
+let editTargetIndex = null;
+
+function editConversation(idx) {
+  editTargetIndex = idx;
+  const currentTitle = conversations[idx].title;
+  document.getElementById("editInput").value = currentTitle;
+  document.getElementById("editModal").classList.remove("hidden");
+}
+
+document.getElementById("cancelEdit").addEventListener("click", () => {
+  document.getElementById("editModal").classList.add("hidden");
+  editTargetIndex = null;
+});
+
+document.getElementById("confirmEdit").addEventListener("click", async () => {
+  const newTitle = document.getElementById("editInput").value.trim();
+  if (!newTitle || editTargetIndex === null) return;
+
+  const threadId = conversations[editTargetIndex].threadId;
+
+  try {
+    const res = await fetch("https://n8n.grupobeely.com.br/webhook/editar-conversa", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ thread_id: threadId, title: newTitle })
+    });
+
+    const result = await res.json();
+    if (result.success) {
+      // Atualiza localmente
+      const finalTitle = result.title || newTitle;
+conversations[editTargetIndex].title = finalTitle;
+
+const convItems = document.querySelectorAll(".conv-item");
+const titleSpan = convItems[editTargetIndex]?.querySelector("span");
+if (titleSpan) titleSpan.textContent = finalTitle;
+
+    }
+  } catch (err) {
+    console.error("Erro ao editar conversa:", err);
+    alert("Erro ao atualizar conversa.");
+  }
+
+  document.getElementById("editModal").classList.add("hidden");
+  editTargetIndex = null;
+});
+
+
+
+let deleteTargetIndex = null;
+
+function deleteConversation(idx) {
+  deleteTargetIndex = idx;
+  document.getElementById("confirmModal").classList.remove("hidden");
+}
+
+document.getElementById("cancelDelete").addEventListener("click", () => {
+  document.getElementById("confirmModal").classList.add("hidden");
+  deleteTargetIndex = null;
+});
+
+document.getElementById("confirmDelete").addEventListener("click", () => {
+  if (deleteTargetIndex !== null) {
+    const threadId = conversations[deleteTargetIndex].threadId;
+
+    conversations.splice(deleteTargetIndex, 1);
+
+    if (conversations.length === 0) {
+      currentConversationIndex = -1;
+      messagesContainer.innerHTML = "";
+    } else {
+      currentConversationIndex = 0;
+      renderCurrentConversation();
+    }
+
+    loadConversationsList();
+
+    fetch("https://n8n.grupobeely.com.br/webhook/excluir-conversa", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ thread_id: threadId })
+    });
+  }
+
+  document.getElementById("confirmModal").classList.add("hidden");
+  deleteTargetIndex = null;
+});
+
+
+async function createNewConversation() {
+  const user_id = localStorage.getItem("user_id");
+
+  try {
+    await fetch("https://n8n.grupobeely.com.br/webhook/Criar-conversas", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: "Nova conversa",
+        user_id
+      })
+    });
+
+    // Após criar, recarrega conversas e foca na primeira
+    await loadUserConversations();
+    currentConversationIndex = 0;
+    renderCurrentConversation();
+  } catch (err) {
+    console.error("Erro ao criar nova conversa:", err);
+    alert("Erro ao criar nova conversa. Tente novamente.");
+  }
+}
+
+
+
     /**********************
      * 5) TOAST (exemplo)
      **********************/
@@ -563,8 +738,11 @@ async function fetchAssistantReply(userText) {
   }
 });
 
-loadUserConversations();
-
+if (conversations.length === 0) {
+  loadUserConversations().then(() => {
+    renderCurrentConversation();
+  });
+}
       checkToast();
       loadUserMessages();
     });
