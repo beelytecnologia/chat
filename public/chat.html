@@ -668,7 +668,7 @@ async function createNewConversation() {
   const user_id = localStorage.getItem("user_id");
 
   try {
-    await fetch("https://n8n.grupobeely.com.br/webhook/Criar-conversas", {
+    const res = await fetch("https://n8n.grupobeely.com.br/webhook/Criar-conversas", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -677,15 +677,22 @@ async function createNewConversation() {
       })
     });
 
-    // Após criar, recarrega conversas e foca na primeira
+    // espera a nova lista
     await loadUserConversations();
     currentConversationIndex = 0;
     renderCurrentConversation();
+
+    // ATUALIZA O LOCALSTORAGE
+    if (conversations[0]) {
+      localStorage.setItem("thread_id", conversations[0].threadId);
+    }
+
   } catch (err) {
     console.error("Erro ao criar nova conversa:", err);
     alert("Erro ao criar nova conversa. Tente novamente.");
   }
 }
+
 
 
 
