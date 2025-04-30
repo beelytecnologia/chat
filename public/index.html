@@ -1,253 +1,205 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login - Beely</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BeelyGo – Agentes de IA para Instagram</title>
+  <style>
+    /* -------------------- Paleta -------------------- */
+    :root{
+      --bg:#00222e;            --card:#0b2a36;       --txt:#e8f7ff;
+      --accent:#00e0ff;        --copy:#4da3ff;       --story:#ffa03a;
+      --slide:#66fff5;         --reel:#ff6767;       --insta:#1be27e;
+      --gancho:#00c4ff;        --radius:14px;
+    }
 
-  <!-- Fonte Roboto via Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link 
-    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" 
-    rel="stylesheet"
-  >
-  <link rel="icon" href="./img/avata-beely-amarelo-1024x1024.png.png" type="image/png" />
-<link rel="stylesheet" href="./css/index.css">
+    /* -------------------- Reset -------------------- */
+    *{box-sizing:border-box;margin:0;padding:0;font-family:Inter,Arial,sans-serif}
 
+    body{background:var(--bg);color:var(--txt);display:flex;flex-direction:column;min-height:100vh}
+
+    /* -------------------- Cabeçalho -------------------- */
+    header{display:flex;align-items:center;justify-content:space-between;padding:20px clamp(16px,5vw,64px);flex-wrap:wrap;gap:12px}
+    .logo{font-size:1.8rem;font-weight:700;color:var(--accent)}
+    .btn{background:var(--accent);color:#003;padding:10px 26px;border:none;border-radius:50px;font-weight:600;cursor:pointer;transition:opacity .25s}
+    .btn:hover{opacity:.85}
+
+    /* -------------------- Herói -------------------- */
+    .hero{max-width:900px;margin:0 auto 48px;padding:0 6vw;text-align:center}
+    .hero h1{font-size:clamp(1.8rem,4.5vw,2.6rem);font-weight:700;margin-bottom:14px}
+    .hero p{font-size:clamp(.95rem,2.5vw,1.05rem);opacity:.85}
+
+    /* -------------------- Grid -------------------- */
+    .grid{display:grid;gap:24px;padding:0 6vw 72px;max-width:1280px;margin:0 auto}
+    /* mobile: 1 coluna */
+    .grid{grid-template-columns:1fr}
+    /* tablet: 2 colunas */
+    @media(min-width:601px){.grid{grid-template-columns:repeat(2,1fr)}}
+    /* desktop: 3 colunas */
+    @media(min-width:1025px){.grid{grid-template-columns:repeat(3,1fr)}}
+
+    /* -------------------- Card -------------------- */
+    .card{background:var(--card);border-radius:var(--radius);padding:28px 24px;position:relative;overflow:hidden;box-shadow:0 4px 10px rgba(0,0,0,.35);transition:transform .25s}
+    .card:hover{transform:translateY(-6px)}
+    .card:before{content:"";position:absolute;left:0;top:0;width:6px;height:100%;border-radius:6px 0 0 6px}
+    .card h3{font-size:1.28rem;margin-bottom:12px;font-weight:700}
+    .card p{font-size:.97rem;opacity:.92}
+
+    .copy:before{background:var(--copy)}
+    .story:before{background:var(--story)}
+    .slide:before{background:var(--slide)}
+    .reel:before{background:var(--reel)}
+    .insta:before{background:var(--insta)}
+    .gancho:before{background:var(--gancho)}
+
+    /* -------------------- CTA inferior -------------------- */
+    footer{text-align:center;margin:auto 0 40px}
+    @media(max-width:600px){
+      footer{margin-bottom:28px}
+    }
+    /* ---------- BENEFITS SECTION ---------- */
+:root{
+  --card-light:#e5eaec;
+  --txt-dark:#00222e;
+}
+
+.benefits{padding:0 6vw 90px;max-width:1280px;margin:0 auto;text-align:center}
+.benefits h2{color:var(--txt-dark);font-size:clamp(1.6rem,4vw,2.2rem);font-weight:700;margin-bottom:48px}
+
+.benefit-grid{
+  display:grid;gap:32px;
+  grid-template-columns:1fr;           /* mobile */
+}
+@media(min-width:701px){               /* tablet */
+  .benefit-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(min-width:1101px){              /* desktop */
+  .benefit-grid{grid-template-columns:repeat(3,1fr)}
+}
+
+.benefit-card{
+  background:var(--card-light);
+  border-radius:18px;padding:34px 28px;
+  text-align:left;color:var(--txt-dark);
+}
+.benefit-card .icon{
+  font-size:2rem;display:inline-block;margin-bottom:18px
+}
+.benefit-card h3{
+  font-size:1.28rem;font-weight:700;margin-bottom:14px
+}
+.benefit-card p{font-size:1.02rem;line-height:1.55}
+
+.dots{margin-top:36px}
+.dot{
+  width:14px;height:14px;border-radius:50%;
+  display:inline-block;margin:0 6px;background:#d4d6d7;
+}
+.dot.active{background:var(--txt-dark)}
+
+  </style>
 </head>
 <body>
 
-  <!-- TOAST DE SUCESSO -->
-  <div id="successToast" class="toast">Login realizado com sucesso!</div>
-<!-- TOAST DE ERRO -->
-<div id="errorToast" class="toast error-toast">Erro ao tentar login.</div>
+  <!-- Cabeçalho -->
+  <header>
+    <div class="logo">Beely<span style="color:#fff">Go</span></div>
+    <button class="btn">   <a href="login.html" class="btn" style="text-decoration: none;    padding: 0px;">Quero conhecer</a>
+      </button>
+  </header>
 
-  <div class="container">
-    <!-- COLUNA ESQUERDA -->
-    <div class="left-col">
-      <div class="form-wrapper">
-        <!-- TÍTULO e SUBTÍTULO -->
-        <h1 class="title">Seja bem vindo!</h1>
-        <p class="subtitle">
-          Entre com suas informações para acessar o painel de Administrador.
-        </p>
+  <!-- Seção principal -->
+  <section class="hero">
+    <h1>Soluções estratégicas para seu Instagram decolar.</h1>
+    <p>O BeelyGo reúne 6 agentes de IA que aceleram sua produção de conteúdo e liberam você para focar no que importa.</p>
+  </section>
 
-        <!-- FORM -->
-        <form>
-          <!-- EMAIL -->
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              class="input"
-              placeholder="Digite seu email"
-            />
-          </div>
+  <!-- Cards -->
+  <section class="grid">
+    <article class="card copy">
+      <h3>🐝 CopyBee</h3>
+      <p>Gere <strong>legendas originais</strong> em segundos, no tom certo para atrair engajamento consistente.</p>
+    </article>
 
-          <!-- SENHA + ÍCONE OLHO -->
-          <div class="form-group password-field">
-            <label for="senha">Senha</label>
-            <input
-              type="password"
-              id="senha"
-              class="input"
-              placeholder="Digite sua senha"
-            />
-            <!-- Ícone do olho (SVG) -->
-            <span class="eye-icon" id="togglePwd">
-              <!-- O "eye" normal -->
-              <svg fill="none" stroke="currentColor" stroke-linecap="round"
-                stroke-linejoin="round" stroke-width="2"
-                viewBox="0 0 24 24">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-            </span>
-          </div>
+    <article class="card story">
+      <h3>🐝 StoryBee</h3>
+      <p>Construa <strong>narrativas envolventes</strong> de Stories que mantêm o público vidrado do primeiro ao último toque.</p>
+    </article>
 
-          <!-- LEMBRAR -->
-          <div class="remember-row">
-            <input type="checkbox" id="lembrar"/>
-            <label for="lembrar">Manter conectado</label>
-          </div>
+    <article class="card slide">
+      <h3>🐝 SlideBee</h3>
+      <p>Monte <strong>carrosséis de impacto</strong> com estrutura, copy e CTA perfeitos para multiplicar a retenção.</p>
+    </article>
 
-          <!-- BOTÃO -->
-          <button id="btnEntrar" type="button" class="btn-login">Entrar</button>
+    <article class="card reel">
+      <h3>🐝 ReelBuzz</h3>
+      <p>Receba roteiros para Reels virais — baseados em tendências, ritmo e cortes — que explodem no Explore.</p>
+    </article>
 
-          <!-- REGISTER LINK -->
-          <div class="register">
-            Não tem uma conta?
-            <a href="#">Registre-se</a>
-          </div>
-        </form>
-      </div>
+    <article class="card insta">
+      <h3>🐝 InstaBee</h3>
+      <p>Ideias certeiras de Stories, enquetes e perguntas para interagir diariamente sem esforço.</p>
+    </article>
+
+    <article class="card gancho">
+      <h3>🐝 GanchoBee</h3>
+      <p>Crie <strong>ganchos e títulos</strong> irresistíveis que interrompem o scroll e fazem o público ficar.</p>
+    </article>
+  </section>
+
+  <!-- CTA final -->
+  <footer>
+  <button class="btn">   <a href="login.html" class="btn" style="text-decoration: none;    padding: 0px;">Quero conhecer</a>
+      </button>  </footer>
+
+  <!-- ===========================================================
+     BENEFÍCIOS DOS AGENTES – 3 CARDS CLAROS
+=========================================================== -->
+<section class="benefits">
+    <h2>Seu tempo é valioso.<br>
+        Foque no que importa, e os nossos agentes cuidam do resto.</h2>
+  
+    <div class="benefit-grid">
+      <!-- 1 -->
+      <article class="benefit-card">
+        <span class="icon">🎯</span>
+        <h3>Crie estratégia, não rascunhos</h3>
+        <p>Deixe que CopyBee e GanchoBee cuidem dos textos otimizados
+           enquanto você decide <em>para onde</em> levar a marca. Mais
+           tempo para planejar, menos tempo para rascunhar.</p>
+      </article>
+  
+      <!-- 2 -->
+      <article class="benefit-card">
+        <span class="icon">⚙️</span>
+        <h3>Tarefas manuais? Nunca mais!</h3>
+        <p>Com SlideBee, StoryBee e ReelBuzz, 90&nbsp;% da produção vira
+           processo automático. Você revisa apenas os 10&nbsp;% finais —
+           inspiração sem transpiração.</p>
+      </article>
+  
+      <!-- 3 -->
+      <article class="benefit-card">
+        <span class="icon">📊</span>
+        <h3>Organização sem bagunça</h3>
+        <p>InstaBee garante frequência e variedade. Tudo catalogado,
+           pronto para publicar e medir resultados, sem planilhas nem
+           arquivos perdidos.</p>
+      </article>
     </div>
-
-    <!-- COLUNA DIREITA (fundo amarelo) -->
-    <div class="right-col">
-      <div class="right-logo"><img src="./img/logo-beely-black.png (1).png" alt=""></div>
+  
+    <!-- bolinhas de slide decorativas (opcional) -->
+    <div class="dots">
+      <span class="dot active"></span>
+      <span class="dot"></span>
     </div>
-  </div>
-
+  </section>
+  
+  <!-- JS (scroll suave nos botões) -->
   <script>
-    // ====== MOSTRAR/OCULTAR SENHA ======
-    const togglePwd = document.getElementById('togglePwd');
-    const pwdInput = document.getElementById('senha');
-
-    // Ícones do olho
-    const eyeOpenSVG = `
-      <svg fill="none" stroke="currentColor" stroke-linecap="round"
-           stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-        <circle cx="12" cy="12" r="3"/>
-      </svg>
-    `;
-    const eyeSlashSVG = `
-      <svg fill="none" stroke="currentColor" stroke-linecap="round"
-           stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
-        <path d="M13.875 13.875l-1.125-1.125m6.897-5.052A10.052 
-                 10.052 0 0 1 21 12s-4 8-9 8a8.95 8.95 0 0 1-3.337-.652m-3.49-2.335A9.984 
-                 9.984 0 0 1 3 12s1.711-3.422 4.27-5.63"/>
-        <path d="M1 1l22 22"/>
-      </svg>
-    `;
-
-    let showingPwd = false;
-
-    togglePwd.addEventListener('click', () => {
-      showingPwd = !showingPwd;
-      if (showingPwd) {
-        pwdInput.type = 'text';
-        togglePwd.innerHTML = eyeSlashSVG;
-      } else {
-        pwdInput.type = 'password';
-        togglePwd.innerHTML = eyeOpenSVG;
-      }
+    document.querySelectorAll('.btn').forEach(btn=>{
+      btn.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
     });
-    const btnEntrar = document.getElementById('btnEntrar');
-const toastSuccess = document.getElementById('successToast');
-const toastError = document.getElementById('errorToast');
-
-function showErrorToast(message) {
-  toastError.textContent = message;
-  toastError.classList.add("show");
-
-  setTimeout(() => {
-    toastError.classList.remove("show");
-  }, 3000);
-}
-
-function showSuccessToast(message) {
-  toastSuccess.textContent = message;
-  toastSuccess.classList.add("show");
-
-  setTimeout(() => {
-    toastSuccess.classList.remove("show");
-  }, 3000);
-}
-
-const registerLink = document.querySelector(".register a");
-const title = document.querySelector(".title");
-const subtitle = document.querySelector(".subtitle");
-let isRegistering = false;
-registerLink.addEventListener("click", (e) => {
-  e.preventDefault();
-  isRegistering = true;
-
-  // Troca título e subtítulo
-  title.textContent = "Crie sua conta";
-  subtitle.textContent = "Preencha os campos para se registrar na plataforma.";
-  
-  // Esconde o checkbox
-  document.querySelector(".remember-row").style.display = "none";
-  
-  // Altera o texto do botão
-  btnEntrar.textContent = "Registrar";
-
-  // Esconde o link de registro
-  registerLink.parentElement.style.display = "none";
-});
-
-
-// Adapte a lógica do botão para envio de cadastro se estiver registrando
-btnEntrar.addEventListener("click", async () => {
-  const email = document.getElementById('email').value.trim();
-  const senha = document.getElementById('senha').value.trim();
-
-  if (!email || !senha) {
-    showErrorToast("Preencha email e senha.");
-    return;
-  }
-
-  btnEntrar.disabled = true;
-  btnEntrar.innerHTML = isRegistering 
-    ? 'Registrando... <span class="spinner"></span>' 
-    : 'Entrando... <span class="spinner"></span>';
-
-  const url = isRegistering
-    ? "https://n8n.grupobeely.com.br/webhook/registrar"
-    : "https://n8n.grupobeely.com.br/webhook/login/aichat";
-
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password: senha })
-    });
-
-    const result = await res.json();
-
-    if (isRegistering) {
-      isRegistering = false;
-      showSuccessToast("Cadastro realizado com sucesso!");
-
-  title.textContent = "Seja bem vindo!";
-  subtitle.textContent = "Entre com suas informações para acessar o painel de Administrador.";
-  document.querySelector(".remember-row").style.display = "flex";
-  registerLink.parentElement.style.display = "";
-  btnEntrar.textContent = "Entrar";
-  btnEntrar.disabled = false;
-  return;
-    }
-
-    if (!result || typeof result.is_approved === "undefined") {
-      showErrorToast("Resposta inválida do servidor.");
-      btnEntrar.disabled = false;
-      btnEntrar.innerHTML = 'Entrar';
-      return;
-    }
-
-    if (result.is_approved) {
-  // Limpa qualquer dado anterior
-  localStorage.clear();
-
-  // Salva dados novos do usuário
-  localStorage.setItem("user_id", result.user_id);
-  localStorage.setItem("thread_id", result.thread_id);
-  localStorage.setItem("user_email", email);
-  localStorage.setItem("toastMessage", "Login realizado com sucesso!");
-  localStorage.setItem("toastTime", Date.now());
-  localStorage.setItem("max_questions", result.max_questions);
-  localStorage.setItem("used_questions", result.used_questions);
-
-  // Redireciona para o chat
-  window.location.href = "./chat.html";
-}
-else {
-      showErrorToast("Seu acesso ainda não foi aprovado.");
-      btnEntrar.disabled = false;
-      btnEntrar.innerHTML = 'Entrar';
-    }
-  } catch (error) {
-    console.error("Erro na requisição:", error);
-    showErrorToast("Erro ao tentar login. Tente novamente.");
-    btnEntrar.disabled = false;
-    btnEntrar.innerHTML = isRegistering ? 'Registrar' : 'Entrar';
-  }
-});
-
   </script>
 </body>
 </html>

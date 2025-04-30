@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login - Beely</title>
+
+  <!-- Fonte Roboto via Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link 
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" 
+    rel="stylesheet"
+  >
+  <link rel="icon" href="./img/avata-beely-amarelo-1024x1024.png.png" type="image/png" />
+<link rel="stylesheet" href="./css/index.css">
+
+</head>
+<body>
+
+  <!-- TOAST DE SUCESSO -->
+  <div id="successToast" class="toast">Login realizado com sucesso!</div>
+<!-- TOAST DE ERRO -->
+<div id="errorToast" class="toast error-toast">Erro ao tentar login.</div>
+
+  <div class="container">
+    <!-- COLUNA ESQUERDA -->
+    <div class="left-col">
+      <div class="form-wrapper">
+        <!-- TÍTULO e SUBTÍTULO -->
+        <h1 class="title">Seja bem vindo!</h1>
+        <p class="subtitle">
+          Entre com suas informações para acessar o BeelyGo.
+        </p>
+
+        <!-- FORM -->
+        <form>
+          <!-- EMAIL -->
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              class="input"
+              placeholder="Digite seu email"
+            />
+          </div>
+
+          <!-- SENHA + ÍCONE OLHO -->
+          <div class="form-group password-field">
+            <label for="senha">Senha</label>
+            <input
+              type="password"
+              id="senha"
+              class="input"
+              placeholder="Digite sua senha"
+            />
+            <!-- Ícone do olho (SVG) -->
+            <span class="eye-icon" id="togglePwd">
+              <!-- O "eye" normal -->
+              <svg fill="none" stroke="currentColor" stroke-linecap="round"
+                stroke-linejoin="round" stroke-width="2"
+                viewBox="0 0 24 24">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </span>
+          </div>
+
+          <!-- LEMBRAR -->
+          <div class="remember-row">
+            <input type="checkbox" id="lembrar"/>
+            <label for="lembrar">Manter conectado</label>
+          </div>
+
+          <!-- BOTÃO -->
+          <button id="btnEntrar" type="button" class="btn-login">Entrar</button>
+
+          <!-- REGISTER LINK -->
+          <div class="register">
+            Não tem uma conta?
+            <a href="#">Registre-se</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- COLUNA DIREITA (fundo amarelo) -->
+    <div class="right-col">
+      <div class="right-logo"><img src="./img/logo-beely-black.png (1).png" alt=""></div>
+    </div>
+  </div>
+
+  <script>
+    // ====== MOSTRAR/OCULTAR SENHA ======
+    const togglePwd = document.getElementById('togglePwd');
+    const pwdInput = document.getElementById('senha');
+
+    // Ícones do olho
+    const eyeOpenSVG = `
+      <svg fill="none" stroke="currentColor" stroke-linecap="round"
+           stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+    `;
+    const eyeSlashSVG = `
+      <svg fill="none" stroke="currentColor" stroke-linecap="round"
+           stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M13.875 13.875l-1.125-1.125m6.897-5.052A10.052 
+                 10.052 0 0 1 21 12s-4 8-9 8a8.95 8.95 0 0 1-3.337-.652m-3.49-2.335A9.984 
+                 9.984 0 0 1 3 12s1.711-3.422 4.27-5.63"/>
+        <path d="M1 1l22 22"/>
+      </svg>
+    `;
+
+    let showingPwd = false;
+
+    togglePwd.addEventListener('click', () => {
+      showingPwd = !showingPwd;
+      if (showingPwd) {
+        pwdInput.type = 'text';
+        togglePwd.innerHTML = eyeSlashSVG;
+      } else {
+        pwdInput.type = 'password';
+        togglePwd.innerHTML = eyeOpenSVG;
+      }
+    });
+    const btnEntrar = document.getElementById('btnEntrar');
+const toastSuccess = document.getElementById('successToast');
+const toastError = document.getElementById('errorToast');
+
+function showErrorToast(message) {
+  toastError.textContent = message;
+  toastError.classList.add("show");
+
+  setTimeout(() => {
+    toastError.classList.remove("show");
+  }, 3000);
+}
+
+function showSuccessToast(message) {
+  toastSuccess.textContent = message;
+  toastSuccess.classList.add("show");
+
+  setTimeout(() => {
+    toastSuccess.classList.remove("show");
+  }, 3000);
+}
+
+const registerLink = document.querySelector(".register a");
+const title = document.querySelector(".title");
+const subtitle = document.querySelector(".subtitle");
+let isRegistering = false;
+registerLink.addEventListener("click", (e) => {
+  e.preventDefault();
+  isRegistering = true;
+
+  // Troca título e subtítulo
+  title.textContent = "Crie sua conta";
+  subtitle.textContent = "Preencha os campos para se registrar na plataforma.";
+  
+  // Esconde o checkbox
+  document.querySelector(".remember-row").style.display = "none";
+  
+  // Altera o texto do botão
+  btnEntrar.textContent = "Registrar";
+
+  // Esconde o link de registro
+  registerLink.parentElement.style.display = "none";
+});
+
+
+// Adapte a lógica do botão para envio de cadastro se estiver registrando
+btnEntrar.addEventListener("click", async () => {
+  const email = document.getElementById('email').value.trim();
+  const senha = document.getElementById('senha').value.trim();
+
+  if (!email || !senha) {
+    showErrorToast("Preencha email e senha.");
+    return;
+  }
+
+  btnEntrar.disabled = true;
+  btnEntrar.innerHTML = isRegistering 
+    ? 'Registrando... <span class="spinner"></span>' 
+    : 'Entrando... <span class="spinner"></span>';
+
+  const url = isRegistering
+    ? "https://n8n.grupobeely.com.br/webhook/registrar"
+    : "https://n8n.grupobeely.com.br/webhook/login/aichat";
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password: senha })
+    });
+
+    const result = await res.json();
+
+    if (isRegistering) {
+      isRegistering = false;
+      showSuccessToast("Cadastro realizado com sucesso!");
+
+  title.textContent = "Seja bem vindo!";
+  subtitle.textContent = "Entre com suas informações para acessar o painel de Administrador.";
+  document.querySelector(".remember-row").style.display = "flex";
+  registerLink.parentElement.style.display = "";
+  btnEntrar.textContent = "Entrar";
+  btnEntrar.disabled = false;
+  return;
+    }
+
+    if (!result || typeof result.is_approved === "undefined") {
+      showErrorToast("Resposta inválida do servidor.");
+      btnEntrar.disabled = false;
+      btnEntrar.innerHTML = 'Entrar';
+      return;
+    }
+
+    if (result.is_approved) {
+  // Limpa qualquer dado anterior
+  localStorage.clear();
+
+  // Salva dados novos do usuário
+  localStorage.setItem("user_id", result.user_id);
+  localStorage.setItem("thread_id", result.thread_id);
+  localStorage.setItem("user_email", email);
+  localStorage.setItem("toastMessage", "Login realizado com sucesso!");
+  localStorage.setItem("toastTime", Date.now());
+  localStorage.setItem("max_questions", result.max_questions);
+  localStorage.setItem("used_questions", result.used_questions);
+
+  // Redireciona para o chat
+  window.location.href = "./chat.html";
+}
+else {
+      showErrorToast("Seu acesso ainda não foi aprovado.");
+      btnEntrar.disabled = false;
+      btnEntrar.innerHTML = 'Entrar';
+    }
+  } catch (error) {
+    console.error("Erro na requisição:", error);
+    showErrorToast("Erro ao tentar login. Tente novamente.");
+    btnEntrar.disabled = false;
+    btnEntrar.innerHTML = isRegistering ? 'Registrar' : 'Entrar';
+  }
+});
+
+  </script>
+</body>
+</html>
